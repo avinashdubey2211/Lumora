@@ -1,9 +1,14 @@
-import { useEffect, useState } from "react";
+
+
+import { useEffect } from "react";
 import "./App.css";
-import { Route, Routes, useLocation } from "react-router-dom";
+
+import { Route, Routes, useLocation, Navigate } from "react-router-dom";
+
 import Layout from "./Layout";
 import Pages from "./Pages";
 import { routes } from "./Routes";
+import Login from "./Component/Login";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -11,27 +16,55 @@ function ScrollToTop() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+
   return null;
 }
+
 function App() {
+  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+
   return (
     <>
       <ScrollToTop />
+
       <Routes>
+        {/* Login Page */}
+        <Route
+          path="/login"
+          element={isLoggedIn ? <Navigate to="/" replace /> : <Login />}
+        />
+
+        {/* Home Page */}
         <Route
           path="/"
-          element=<Layout>
-            <Pages />
-          </Layout>
+          element={
+            isLoggedIn ? (
+              <Layout>
+                <Pages />
+              </Layout>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
         />
-        {/* Other Pages from routes.jsx */}
+
+        {/* Other Pages */}
         {routes.map((route) => (
           <Route
             key={route.id}
             path={route.path}
-            element={<Layout>{route.element}</Layout>}
+            element={
+              isLoggedIn ? (
+                <Layout>{route.element}</Layout>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
           />
         ))}
+
+        {/* Invalid URL */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
   );
